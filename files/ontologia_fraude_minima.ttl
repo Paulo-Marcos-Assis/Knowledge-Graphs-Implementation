@@ -1,0 +1,81 @@
+@prefix fr: <http://example.org/ceos/fraude#> .
+@prefix ex: <http://example.org/ceos/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Ontologia mínima — fraude em licitações (etapa 2)
+# Derivada de files/ontologia_fraude_minima.owl (WebProtégé) + files/prompt_extracao_kg.py ONTOLOGY_PARTS
+# Correções aplicadas ao .owl:
+#   empres -> fr:Empresa | realizadaPorr -> fr:realizadaPor | envolve_fraudee -> fr:relataFraude / fr:relativaALicitacao
+#   IDs webprotege.stanford.edu/Rxxx trocados por IRIs legíveis fr:
+# Compatível com prompt_extracao_kg.py: núcleo = exatamente as 7 classes + props do ONTOLOGY_PARTS.
+# Extensão etapa 3 (proveniência/linkage) marcada abaixo; não usar na extração restrita.
+
+<http://example.org/ceos/fraude> a owl:Ontology ;
+    rdfs:label "Ontologia mínima de fraude em licitações"@pt-br ;
+    rdfs:comment "Núcleo compatível com prompt_extracao_kg.py. Extensão para etapa 3 e compat OWL indicadas."@pt-br .
+
+# ---------- Classes núcleo (7 = ONTOLOGY_PARTS) ----------
+fr:Pessoa a owl:Class ; rdfs:label "pessoa"@pt-br ; rdfs:comment "Ex-OWL pessoa. Cobre jornalista, prefeito, engenheiro, promotor."@pt-br .
+fr:Empresa a owl:Class ; rdfs:label "empresa"@pt-br ; rdfs:comment "Ex-OWL empres (typo corrigido)."@pt-br .
+fr:OrgaoPublico a owl:Class ; rdfs:label "órgão público"@pt-br ; rdfs:comment "Ex-OWL orgao_publico: prefeitura, MPSC, TCE, ministério."@pt-br .
+fr:Localidade a owl:Class ; rdfs:label "localidade"@pt-br ; rdfs:comment "Município/comarca. Ex-OWL municipio vira subclasse."@pt-br .
+fr:Licitacao a owl:Class ; rdfs:label "licitação"@pt-br ; rdfs:comment "Ex-OWL licitacao: edital + modalidade + valor."@pt-br .
+fr:Fraude a owl:Class ; rdfs:label "fraude"@pt-br ; rdfs:comment "Ex-OWL fraude. Subtipos OWL (em_licitacao, bancaria, contabil) substituídos por vocabulário controlado fr:TipoFraude."@pt-br .
+fr:Noticia a owl:Class ; rdfs:label "notícia"@pt-br ; rdfs:comment "Ex-OWL noticia. Subtipos noticia_fraude/licitacao/outros viram subclasses abaixo."@pt-br .
+
+# Subclasses preservadas do OWL (opcionais, não quebram o núcleo)
+fr:Municipio a owl:Class ; rdfs:subClassOf fr:Localidade ; rdfs:label "município"@pt-br .
+fr:NoticiaFraude a owl:Class ; rdfs:subClassOf fr:Noticia ; rdfs:label "notícia de fraude"@pt-br .
+fr:NoticiaLicitacao a owl:Class ; rdfs:subClassOf fr:Noticia ; rdfs:label "notícia de licitação"@pt-br .
+fr:Portal a owl:Class ; rdfs:label "portal"@pt-br ; rdfs:comment "Ex-OWL portal: veículo (nsc, ndmais, tvbv)."@pt-br .
+fr:ModalidadeLicitacao a owl:Class ; rdfs:label "modalidade de licitação"@pt-br ; rdfs:comment "Ex-OWL modalidade_licitacao: pregao_eletronico, pregao_presencial."@pt-br .
+
+# ---------- Vocabulários controlados ----------
+fr:TipoFraude a owl:Class ; rdfs:label "tipo de fraude"@pt-br .
+fr:FraudeLicitacao a fr:TipoFraude ; rdfs:label "fraude a licitação"@pt-br .
+fr:DirecionamentoLicitacao a fr:TipoFraude ; rdfs:label "direcionamento de licitação"@pt-br .
+fr:Superfaturamento a fr:TipoFraude ; rdfs:label "superfaturamento"@pt-br .
+fr:CartelConluio a fr:TipoFraude ; rdfs:label "cartel / conluio"@pt-br .
+fr:DocumentoFalso a fr:TipoFraude ; rdfs:label "documento falso"@pt-br .
+fr:Corrupcao a fr:TipoFraude ; rdfs:label "corrupção"@pt-br .
+fr:OutroTipo a fr:TipoFraude ; rdfs:label "outro tipo"@pt-br .
+
+fr:StatusProcessual a owl:Class ; rdfs:label "status processual"@pt-br .
+fr:Investigado a fr:StatusProcessual ; rdfs:label "investigado"@pt-br .
+fr:Denunciado a fr:StatusProcessual ; rdfs:label "denunciado"@pt-br .
+fr:Condenado a fr:StatusProcessual ; rdfs:label "condenado"@pt-br .
+fr:Absolvido a fr:StatusProcessual ; rdfs:label "absolvido"@pt-br .
+fr:StatusNaoInformado a fr:StatusProcessual ; rdfs:label "status não informado"@pt-br .
+
+# ---------- Object properties núcleo ----------
+fr:menciona a owl:ObjectProperty ; rdfs:label "menciona"@pt-br ; rdfs:domain fr:Noticia ; rdfs:comment "Cobre OWL mencionaEmpresa/mencionaLicitacao genéricos."@pt-br .
+fr:relataFraude a owl:ObjectProperty ; rdfs:label "relata fraude"@pt-br ; rdfs:domain fr:Noticia ; rdfs:range fr:Fraude ; rdfs:comment "Ex-OWL envolve_fraudee (typo corrigido) no sentido notícia->fraude."@pt-br .
+fr:tipoFraude a owl:ObjectProperty ; rdfs:label "tem tipo de fraude"@pt-br ; rdfs:domain fr:Fraude ; rdfs:range fr:TipoFraude .
+fr:envolvePessoa a owl:ObjectProperty ; rdfs:label "envolve pessoa"@pt-br ; rdfs:domain fr:Fraude ; rdfs:range fr:Pessoa .
+fr:envolveEmpresa a owl:ObjectProperty ; rdfs:label "envolve empresa"@pt-br ; rdfs:domain fr:Fraude ; rdfs:range fr:Empresa .
+fr:envolveOrgao a owl:ObjectProperty ; rdfs:label "envolve órgão"@pt-br ; rdfs:domain fr:Fraude ; rdfs:range fr:OrgaoPublico .
+fr:relativaALicitacao a owl:ObjectProperty ; rdfs:label "relativa a licitação"@pt-br ; rdfs:domain fr:Fraude ; rdfs:range fr:Licitacao .
+fr:ocorreEm a owl:ObjectProperty ; rdfs:label "ocorre em"@pt-br ; rdfs:domain fr:Fraude ; rdfs:range fr:Localidade .
+fr:statusPessoa a owl:ObjectProperty ; rdfs:label "status da pessoa"@pt-br ; rdfs:domain fr:Pessoa ; rdfs:range fr:StatusProcessual ; rdfs:comment "Só o que a notícia afirma; senão fr:StatusNaoInformado."@pt-br .
+fr:socioDe a owl:ObjectProperty ; rdfs:label "sócio de"@pt-br ; rdfs:domain fr:Pessoa ; rdfs:range fr:Empresa ; rdfs:comment "Cobre OWL temsocio/participaDe (invertido e normalizado)."@pt-br .
+
+# ---------- Datatype properties núcleo ----------
+fr:mencaoOriginal a owl:DatatypeProperty ; rdfs:label "menção original"@pt-br ; rdfs:range xsd:string ; rdfs:comment "Texto exato da menção."@pt-br .
+fr:nomeNormalizado a owl:DatatypeProperty ; rdfs:label "nome normalizado"@pt-br ; rdfs:range xsd:string ; rdfs:comment "MAIÚSCULAS, sem acento p/ linkage etapa 3."@pt-br .
+fr:cnpj a owl:DatatypeProperty ; rdfs:label "CNPJ"@pt-br ; rdfs:range xsd:string ; rdfs:comment "Ex-OWL temCNPJ. Só se a notícia trouxer; nunca inventar."@pt-br .
+fr:cargo a owl:DatatypeProperty ; rdfs:label "cargo"@pt-br ; rdfs:domain fr:Pessoa ; rdfs:range xsd:string .
+fr:valorReais a owl:DatatypeProperty ; rdfs:label "valor em reais"@pt-br ; rdfs:domain fr:Licitacao ; rdfs:range xsd:decimal ; rdfs:comment "Ex-OWL temValorEstimado."@pt-br .
+fr:anoLicitacao a owl:DatatypeProperty ; rdfs:label "ano da licitação"@pt-br ; rdfs:domain fr:Licitacao ; rdfs:range xsd:gYear .
+fr:numeroEdital a owl:DatatypeProperty ; rdfs:label "número do edital"@pt-br ; rdfs:domain fr:Licitacao ; rdfs:range xsd:string ; rdfs:comment "Ex-OWL temNumeroEdital."@pt-br .
+fr:trechoOrigem a owl:DatatypeProperty ; rdfs:label "trecho de origem"@pt-br ; rdfs:domain fr:Fraude ; rdfs:range xsd:string ; rdfs:comment "Frase-suporte da fraude (proveniência mínima)."@pt-br .
+
+# ---------- Extensão etapa 3 (NÃO usar na extração restrita; só linkage/proveniência) ----------
+fr:realizadaPor a owl:ObjectProperty ; rdfs:label "realizada por"@pt-br ; rdfs:domain fr:Licitacao ; rdfs:range fr:OrgaoPublico ; rdfs:comment "Ex-OWL realizadaPorr (typo corrigido)."@pt-br .
+fr:possuiModalidade a owl:ObjectProperty ; rdfs:label "possui modalidade"@pt-br ; rdfs:domain fr:Licitacao ; rdfs:range fr:ModalidadeLicitacao ; rdfs:comment "Ex-OWL possuiModalidade."@pt-br .
+fr:publicadaEm a owl:ObjectProperty ; rdfs:label "publicada em"@pt-br ; rdfs:domain fr:Noticia ; rdfs:range fr:Portal ; rdfs:comment "Ex-OWL publicadaEm."@pt-br .
+fr:temURL a owl:DatatypeProperty ; rdfs:label "URL"@pt-br ; rdfs:domain fr:Noticia ; rdfs:range xsd:anyURI ; rdfs:comment "Ex-OWL temURL."@pt-br .
+fr:temTitulo a owl:DatatypeProperty ; rdfs:label "título"@pt-br ; rdfs:domain fr:Noticia ; rdfs:range xsd:string .
+fr:temDataPublicacao a owl:DatatypeProperty ; rdfs:label "data de publicação"@pt-br ; rdfs:domain fr:Noticia ; rdfs:range xsd:date .
